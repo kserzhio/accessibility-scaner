@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id        String    @id @default(uuid())
+  name      String
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pages     Page[]
+  access ProjectAccess[]
+
+  // Доступ для користувачів (можна додати окрему таблицю ProjectAccess, якщо буде RBAC)
+}
+
+model Page {
+  id         String    @id @default(uuid())
+  url        String
+  slug       String    // для зберігання URL як частини шляху
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  status     PageStatus @default(PENDING)
+  projectId  String
+  project    Project   @relation(fields: [projectId], references: [id])
+  scanResults ScanResult[]
+}
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  password  String
+  name      String?
+  role      UserRole   @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  access    ProjectAccess[]
+}
+
+model ProjectAccess {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String
+  user      User     @relation(fields: [userId], references: [id])
+  project   Project  @relation(fields: [projectId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, projectId])  // Користувач не може бути доданий двічі до одного проєкту
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model ScanResult {
+  id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  complianceScore Float
+  screenshotPath  String
+  pageId     String
+  page       Page      @relation(fields: [pageId], references: [id])
+  violations Violation[]
+}
+
+model Violation {
+  id         String    @id @default(uuid())
+  impact     ImpactLevel
+  description String
+  helpUrl    String
+  selector   String
+  screenshotPath String
+  scanResultId String
+  scanResult   ScanResult @relation(fields: [scanResultId], references: [id])
+}
+
+enum PageStatus {
+  PENDING
+  SUCCESS
+  ERROR
+}
+
+enum ImpactLevel {
+  CRITICAL
+  SERIOUS
+  MODERATE
+  MINOR
+}
