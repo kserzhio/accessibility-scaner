@@ -1,5 +1,3 @@
-// lib/services/scanService.ts
-
 import { prisma } from 'lib/prisma'
 import { Page, Violation, ImpactLevel } from '@prisma/client'
 import path from 'path'
@@ -85,10 +83,17 @@ export async function analyzeWithCache(page: Page, projectSlug: string) {
                 },
             },
         })
-
+        await prisma.page.update({
+            where: { id: page.id },
+            data: { status: 'SUCCESS' },
+        })
         return scanResult
     } catch (error) {
         console.error(`Error scanning page ${page.url}:`, error)
+        await prisma.page.update({
+            where: { id: page.id },
+            data: { status: 'ERROR' },
+        })
         throw error
     } finally {
         await browser.close()

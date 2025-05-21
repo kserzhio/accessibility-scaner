@@ -1,5 +1,3 @@
-// app/api/projects/route.ts
-
 import { NextResponse } from 'next/server'
 import { projectService } from 'services/projectService'
 

@@ -2,7 +2,9 @@
 
 import { ThemeToggle } from './ThemeToggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Bell, MessageCircle } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 
 export function Topbar() {
@@ -13,6 +15,23 @@ export function Topbar() {
       <div className="text-lg font-semibold">Dashboard</div>
 
       <div className="flex items-center gap-4">
+        <div className="relative">
+          <Button variant="ghost" size="icon" className='cursor-pointer'>
+            <MessageCircle className="w-5 h-5" />
+          </Button>
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full px-1.5">
+            3
+          </span>
+        </div>
+
+        <div className="relative">
+          <Button variant="ghost" size="icon" className='cursor-pointer'>
+            <Bell className="w-5 h-5" />
+          </Button>
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full px-1.5">
+            5
+          </span>
+        </div>
         <ThemeToggle />
 
         <DropdownMenu>

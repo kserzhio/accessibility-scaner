@@ -16,7 +16,7 @@ export default async function ProjectsPage() {
                     {projects.map((project) => (
                         <Link
                             key={project.id}
-                            href={`/admin/projects/${project.id}/pages`}
+                            href={`/admin/projects/${project.id}`}
                             className="block border border-border p-4 rounded-md hover:bg-muted transition"
                         >
                             <div className="flex justify-between items-center">

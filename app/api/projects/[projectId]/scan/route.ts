@@ -1,5 +1,3 @@
-// app/api/projects/[projectId]/scan/route.ts
-
 import { NextResponse } from 'next/server'
 import { scanProjectPages } from 'services/scanService'
 
