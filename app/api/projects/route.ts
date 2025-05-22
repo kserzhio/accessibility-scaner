@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { ProjectAccessService } from 'services/ProjectAccessService'
 import { projectService } from 'services/projectService'
 
 export async function POST(req: Request) {
@@ -14,4 +15,8 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
+}
+export async function GET() {
+    const projects = await ProjectAccessService.getAllProjects();
+    return Response.json({ projects });
 }

@@ -21,8 +21,7 @@ model Project {
   updatedAt DateTime  @updatedAt
   pages     Page[]
   access ProjectAccess[]
-
-  // Доступ для користувачів (можна додати окрему таблицю ProjectAccess, якщо буде RBAC)
+  auditResults AuditResult[]
 }
 
 model Page {
@@ -83,7 +82,30 @@ model Violation {
   scanResultId String
   scanResult   ScanResult @relation(fields: [scanResultId], references: [id])
 }
+model WcagCriterion {
+  id               String   @id                 // напр. "1.1.1"
+  title            String                      // напр. "Non-text Content"
+  level            ConformanceLevel            // A | AA | AAA
+  principle        Principle                   // Perceivable | Operable | ...
+  description      String
+  understandingUrl String
+  howToMeetUrl     String
 
+  auditResults     AuditResult[]
+}
+model AuditResult {
+  id           String   @id @default(uuid())
+  projectId    String
+  criterionId  String
+  outcome      Outcome  @default(NOT_CHECKED)
+  observations String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  criterion    WcagCriterion @relation(fields: [criterionId], references: [id])
+  project      Project       @relation(fields: [projectId], references: [id])
+}
 enum PageStatus {
   PENDING
   SUCCESS
@@ -95,4 +117,22 @@ enum ImpactLevel {
   SERIOUS
   MODERATE
   MINOR
+}
+enum Outcome {
+  PASSED
+  FAILED
+  CANT_TELL
+  NOT_PRESENT
+  NOT_CHECKED
+}
+enum ConformanceLevel {
+  A
+  AA
+  AAA
+}
+enum Principle {
+  PERCEIVABLE
+  OPERABLE
+  UNDERSTANDABLE
+  ROBUST
 }

@@ -5,13 +5,14 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from 'lib/utils'
-import { Home, Users, LayoutDashboard } from 'lucide-react'
+import { Home, Users, LayoutDashboard, ShieldCheck } from 'lucide-react'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-  { id: 'users', label: 'Users', href: '/admin/users', icon: Users },
+  { id: 'project-access', label: 'Project Access', href: '/admin/project-access', icon: Users },
   { id: 'Create Projects', label: 'Create Projects', href: '/admin/projects/create', icon: Home },
   { id: 'Projects', label: 'Projects', href: '/admin/projects', icon: Home },
+  { id: 'Audit', label: 'Audit', href: '/admin/audit', icon: ShieldCheck  },
 ]
 
 export function Sidebar() {

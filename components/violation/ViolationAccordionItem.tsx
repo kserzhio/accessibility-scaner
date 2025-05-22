@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AccordionContent, AccordionItem, AccordionTrigger } from 'components/ui/accordion'
+import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Loader2 } from 'lucide-react'
 
 interface Props {

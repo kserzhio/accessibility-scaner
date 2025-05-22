@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
-import { Accordion } from 'components/ui/accordion'
+import { Accordion } from '@/components/ui/accordion'
 import { ViolationAccordionItem } from 'components/violation/ViolationAccordionItem'
 
 export default function ScanDetailsPage() {

@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 import { ArrowLeft } from 'lucide-react'
-import { ProjectLineChart } from 'components/ProjectLineChart'
-import { ProjectPieChart } from 'components/ProjectPieChart'
+import { ProjectLineChart } from 'components/charts/ProjectLineChart'
+import { ProjectPieChart } from 'components/charts/ProjectPieChart'
 
 export default function ProjectPage() {
     const { projectId } = useParams() as { projectId: string }

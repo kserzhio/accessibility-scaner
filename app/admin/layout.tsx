@@ -1,5 +1,5 @@
-import { Sidebar } from 'components/Sidebar'
-import { Topbar } from 'components/Topbar'
+import { Sidebar } from 'components/navigations/Sidebar'
+import { Topbar } from 'components/navigations/Topbar'
 import { ReactNode } from 'react'
 
 
