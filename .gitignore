@@ -9,7 +9,11 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+# Ignore entire migrations folder
+prisma/migrations/
 
+# Ignore seed file
+prisma/seed.ts
 # testing
 /coverage
 

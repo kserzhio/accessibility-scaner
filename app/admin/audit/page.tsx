@@ -1,10 +1,8 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { projectService } from 'services/projectService';
 
 interface Project {
     id: string;
@@ -12,15 +10,8 @@ interface Project {
     createdAt: string;
 }
 
-export default function AuditProjectsListPage() {
-    const [projects, setProjects] = useState<Project[]>([]);
-
-    useEffect(() => {
-        setProjects([
-            { id: '1', name: 'E-commerce App', createdAt: '2024-11-01' },
-            { id: '2', name: 'Admin Portal', createdAt: '2024-12-15' },
-        ]);
-    }, []);
+export default async function AuditProjectsListPage() {
+    const projects = await projectService.getAllProjects()
 
     return (
         <div className="space-y-6">

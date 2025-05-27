@@ -4,7 +4,10 @@ import { Badge } from '@/components/ui/badge'
 
 export default async function ProjectsPage() {
     const projects = await projectService.getAllProjects()
-
+    const statusColor = {
+        in_progress: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        completed: 'bg-green-100 text-green-800 border-green-200',
+    };
     return (
         <div className="max-w-5xl mx-auto mt-10 space-y-6">
             <h1 className="text-2xl font-semibold">All Projects</h1>
@@ -24,9 +27,15 @@ export default async function ProjectsPage() {
                                     <h2 className="text-lg font-medium">{project.name}</h2>
                                     <p className="text-sm text-muted-foreground">/{project.slug}</p>
                                 </div>
-                                <Badge variant="outline">
-                                    {project.pages.length} page{project.pages.length !== 1 && 's'}
-                                </Badge>
+                                <div className='flex flex-col gap-2'>
+                                    <Badge variant="outline">
+                                        {project.pages.length} page{project.pages.length !== 1 && 's'}
+                                    </Badge>
+                                    <Badge className={statusColor[project.status as keyof typeof statusColor]}>
+                                        {project.status === 'in_progress' ? 'in_progress' : 'completed'}
+                                    </Badge>
+                                </div>
+
                             </div>
                             <p className="text-xs text-muted-foreground mt-2">
                                 Created at: {new Date(project.createdAt).toLocaleDateString()}

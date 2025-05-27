@@ -36,7 +36,7 @@ export const AuditAccordion = ({ criteria, onChange }: AuditAccordionProps) => {
     <Accordion type="multiple" className="space-y-4">
       {Object.entries(grouped).map(([principle, items]) => (
         <AccordionItem key={principle} value={principle} className="border rounded-xl bg-muted/30">
-          <AccordionTrigger className="text-lg font-semibold px-4 py-3">
+          <AccordionTrigger className="text-lg font-semibold px-4 py-3 cursor-pointer">
             {PRINCIPLE_LABELS[principle]}
           </AccordionTrigger>
           <AccordionContent className="p-4 space-y-4">

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
 import { ProjectLineChart } from 'components/charts/ProjectLineChart'
 import { ProjectPieChart } from 'components/charts/ProjectPieChart'
 
@@ -29,15 +29,19 @@ export default function ProjectPage() {
     }
     return (
         <div className="max-w-7xl mx-auto mt-10 space-y-10 pb-8">
-            <div className="flex flex-col items-left gap-3">
+            <div className="flex justify-between items-left gap-3">
                 <Link href="/admin/projects">
                     <Button variant="ghost" size="sm" className='cursor-pointer'>
                         <ArrowLeft className="w-4 h-4 mr-1" /> Back to all projects
                     </Button>
                 </Link>
-                <h1 className="text-3xl font-bold">{project.name}</h1>
+                <Link href={`/admin/projects/${project.id}/pages`}>
+                    <Button variant="outline" size="sm" className='cursor-pointer'>
+                        <Plus /> Add Page To The Project
+                    </Button>
+                </Link>
             </div>
-
+            <h1 className="text-3xl font-bold">{project.name}</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProjectLineChart data={stats.history} />
                 <div className="space-y-4 bg-white dark:bg-gray-950 p-4 rounded-md shadow-sm flex items-start">

@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { AuditAccordion } from 'components/audit/AuditAccordion';
 import { AuditSidebar } from 'components/audit/AuditSidebar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'react-toastify';
 
-// Тип критерію
 interface Criterion {
     id: string;
     title: string;
@@ -17,44 +19,39 @@ interface Criterion {
     observations?: string;
 }
 
-// Сторінка аудиту для конкретного проекту
 export default function AuditPage() {
+    const pathname = usePathname();
+    const projectId = pathname.split('/').pop();
+
     const [criteria, setCriteria] = useState<Criterion[]>([]);
+    const [levelFilter, setLevelFilter] = useState<'A' | 'AA' | 'AAA' | 'ALL'>('ALL');
 
-    // Фейкові дані для демонстрації
     useEffect(() => {
-        // Тут зробити fetch з API
-        setCriteria([
-            {
-                id: '1.1.1',
-                title: 'Non-text Content',
-                level: 'A',
-                principle: 'PERCEIVABLE',
-                description: 'Provide text alternatives for any non-text content...',
-                understandingUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/1-1-1.html',
-                howToMeetUrl: 'https://www.w3.org/WAI/WCAG22/quickref/#non-text-content',
-                outcome: 'NOT_CHECKED',
-                observations: '',
-            },
-            {
-                id: '2.4.7',
-                title: 'Focus Visible',
-                level: 'AA',
-                principle: 'OPERABLE',
-                description: 'Ensure that keyboard focus is visible for all UI elements.',
-                understandingUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html',
-                howToMeetUrl: 'https://www.w3.org/WAI/WCAG22/quickref/#focus-visible',
-                outcome: 'PASSED',
-                observations: 'Focus ring is visible on all buttons.',
-            }
-        ]);
-    }, []);
+        if (!projectId) return;
+        fetch(`/api/projects/${projectId}/audit`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) setCriteria(data.criteria);
+            });
+    }, [projectId]);
 
-    const handleUpdate = (id: string, update: { outcome: string; observations: string }) => {
-        setCriteria((prev) =>
-            prev.map((c) => (c.id === id ? { ...c, ...update } : c))
-        );
+    const handleUpdate = async (id: string, update: { outcome: string; observations: string }) => {
+        setCriteria(prev => prev.map(c => c.id === id ? { ...c, ...update } : c));
+
+        try {
+            await fetch(`/api/projects/${projectId}/audit/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(update),
+            });
+            toast.success('Saved successfully');
+        } catch (error) {
+            toast.error('Error successfully');
+            console.error('Failed to save audit result:', error);
+        }
     };
+
+    const filteredCriteria = criteria.filter(c => levelFilter === 'ALL' || c.level === levelFilter);
 
     const calculateStats = () => {
         const stats = {
@@ -77,10 +74,23 @@ export default function AuditPage() {
     return (
         <div className="flex gap-6">
             <div className="w-full md:w-2/3 lg:w-3/4">
-                <AuditAccordion criteria={criteria} onChange={handleUpdate} />
+                <div className="mb-4">
+                    <Select defaultValue={levelFilter} onValueChange={(value) => setLevelFilter(value as any)}>
+                        <SelectTrigger className="w-48">
+                            <SelectValue placeholder="Filter by Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All Levels</SelectItem>
+                            <SelectItem value="A">Level A</SelectItem>
+                            <SelectItem value="AA">Level AA</SelectItem>
+                            <SelectItem value="AAA">Level AAA</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <AuditAccordion criteria={filteredCriteria} onChange={handleUpdate} />
             </div>
             <div className="hidden md:block md:w-1/3 lg:w-1/4">
-                <AuditSidebar stats={calculateStats()} />
+                <AuditSidebar stats={calculateStats()} projectId={projectId!}/>
             </div>
         </div>
     );

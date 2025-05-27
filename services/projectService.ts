@@ -167,4 +167,10 @@ export const projectService = {
             violations: scan.violations,
         }
     },
+    async completeProject(projectId: string) {
+        return await prisma.project.update({
+            where: { id: projectId },
+            data: { status: 'completed' },
+        });
+    }
 }

@@ -20,6 +20,7 @@ model Project {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   pages     Page[]
+  status ProjectStatus @default(in_progress)
   access ProjectAccess[]
   auditResults AuditResult[]
 }
@@ -111,7 +112,10 @@ enum PageStatus {
   SUCCESS
   ERROR
 }
-
+enum ProjectStatus {
+  in_progress
+  completed
+}
 enum ImpactLevel {
   CRITICAL
   SERIOUS

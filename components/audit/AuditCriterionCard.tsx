@@ -16,6 +16,26 @@ interface AuditCriterionCardProps {
   observations?: string;
   onChange: (update: { outcome: string; observations: string }) => void;
 }
+const getOutcomeBadgeColor = (outcome: string) => {
+  switch (outcome) {
+    case 'PASSED': return 'bg-green-200 text-green-800';
+    case 'FAILED': return 'bg-red-200 text-red-800';
+    case 'CANT_TELL': return 'bg-yellow-200 text-yellow-800';
+    case 'NOT_PRESENT': return 'bg-gray-200 text-gray-800';
+    case 'NOT_CHECKED': return 'bg-neutral-200 text-neutral-700';
+    default: return 'bg-neutral-100 text-neutral-700';
+  }
+};
+const getOutcomeBorderColor = (outcome: string) => {
+  switch (outcome) {
+    case 'PASSED': return 'border-green-500';
+    case 'FAILED': return 'border-red-500';
+    case 'CANT_TELL': return 'border-yellow-500';
+    case 'NOT_PRESENT': return 'border-gray-400';
+    case 'NOT_CHECKED': return 'border-neutral-300';
+    default: return 'border-neutral-200';
+  }
+};
 
 export const AuditCriterionCard = ({
   id,
@@ -29,14 +49,17 @@ export const AuditCriterionCard = ({
   onChange
 }: AuditCriterionCardProps) => {
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [localObservations, setLocalObservations] = useState(observations);
 
   return (
-    <div className="border rounded-xl p-4 bg-white dark:bg-gray-900 shadow-sm space-y-4">
+    <div className={`relative rounded-xl p-4 bg-white dark:bg-gray-900 shadow-md space-y-4 border-l-4 pl-5 ${getOutcomeBorderColor(outcome)}`}>
+
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <h3 className="text-base font-semibold text-gray-900 dark:text-white">
           {id}: {title} <span className="ml-2 px-2 py-0.5 text-xs bg-gray-200 dark:bg-gray-800 rounded-full">Level {level}</span>
         </h3>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getOutcomeBadgeColor(outcome)}`}>{outcome.replace('_', ' ')}</span>
           <Link href={understandingUrl} target="_blank" className="text-sm text-blue-600 hover:underline inline-flex items-center">
             Understanding <ExternalLink className="ml-1 h-4 w-4" />
           </Link>
@@ -67,7 +90,7 @@ export const AuditCriterionCard = ({
             defaultValue={outcome}
             onValueChange={(value) => onChange({ outcome: value, observations })}
           >
-            <SelectTrigger id={`outcome-${id}`}> 
+            <SelectTrigger id={`outcome-${id}`}>
               <SelectValue placeholder="Select outcome" />
             </SelectTrigger>
             <SelectContent>
@@ -86,11 +109,19 @@ export const AuditCriterionCard = ({
           </label>
           <Textarea
             id={`observations-${id}`}
-            value={observations}
-            onChange={(e) => onChange({ outcome, observations: e.target.value })}
+            value={localObservations}
+            onChange={(e) => setLocalObservations(e.target.value)}
             placeholder="Add notes, examples, or context..."
             className="min-h-[80px]"
           />
+          <Button
+            variant="secondary"
+            size="sm"
+            className="mt-2 cursor-pointer"
+            onClick={() => onChange({ outcome, observations: localObservations })}
+          >
+            Save Observations
+          </Button>
         </div>
       </div>
 
