@@ -1,4 +1,4 @@
-import { ProjectAccessService } from "services/ProjectAccessService";
+import { ProjectAccessService } from "services/db/ProjectAccessService";
 
 export async function POST(req: Request) {
     const { userId, projectId } = await req.json();

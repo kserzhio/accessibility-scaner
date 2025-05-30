@@ -30,7 +30,6 @@ export function LoginForm() {
     if (result?.error) {
       setError('Invalid email or password')
     } else {
-      // Отримати роль з сесії (опціонально через getSession), або просто перекинути
       const res = await fetch('/api/auth/session')
       const session = await res.json()
       if (session?.user?.role === 'ADMIN') {

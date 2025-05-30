@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server'
 import { prisma } from 'lib/prisma'
-import { analyzeWithCache } from 'services/scanService'
+import { analyzeWithCache } from 'services/db/scanService'
 
 
 export async function POST(

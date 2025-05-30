@@ -1,13 +1,12 @@
 'use client';
-
+import { Users, AlertTriangle, Clock } from "lucide-react";
+import { motion } from "motion/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ProjectLineChart } from "components/charts/ProjectLineChart";
 import { ProjectPieChart } from "components/charts/ProjectPieChart";
-import { Bell, Users, AlertTriangle, CheckCircle, Clock } from "lucide-react";
-import { motion } from "motion/react";
+
 
 const MotionDiv = motion.div;
 

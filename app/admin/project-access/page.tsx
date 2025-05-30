@@ -1,77 +1,59 @@
 'use client'
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { toast } from "react-toastify"
+import { fetchProjects, fetchProjectMembers, removeUserFromProject, assignUserToProject } from 'services/api/projectService';
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { toast } from "react-toastify"
-interface Project {
-    id: string
-    name: string
-}
 
-interface User {
-    id: string
-    email: string
-    name: string | null
-}
 
-interface ProjectMember {
-    user: User
-}
 export default function ProjectAccessPage() {
-    const [projects, setProjects] = useState<Project[]>([])
-    const [selectedProject, setSelectedProject] = useState<string>("")
-    const [userEmail, setUserEmail] = useState<string>("")
-    const [members, setMembers] = useState<ProjectMember[]>([])
+    const [selectedProject, setSelectedProject] = useState<string>('');
+    const [userEmail, setUserEmail] = useState<string>('');
 
-    useEffect(() => {
-        fetch("/api/projects")
-            .then(res => res.json())
-            .then(data => setProjects(data.projects))
-    }, [])
+    const {
+        data: projects = [],
+        isLoading: loadingProjects,
+    } = useQuery({
+        queryKey: ['projects'],
+        queryFn: fetchProjects,
+    });
 
-    useEffect(() => {
-        if (!selectedProject) return
-        fetch(`/api/projects/${selectedProject}/members`)
-            .then(res => res.json())
-            .then(data => setMembers(data.members))
-    }, [selectedProject])
+    const {
+        data: members = [],
+        isLoading: loadingMembers,
+        refetch: refetchMembers,
+    } = useQuery({
+        queryKey: ['projectMembers', selectedProject],
+        queryFn: () => fetchProjectMembers(selectedProject),
+        enabled: !!selectedProject,
+    });
 
     const handleAdd = async () => {
-        if (!selectedProject || !userEmail) return
+        if (!selectedProject || !userEmail) return;
 
-        const res = await fetch("/api/projects/access/assign", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ projectId: selectedProject, userEmail })
-        })
-
-        if (res.ok) {
-            toast.success('User added')
-            setUserEmail("")
-            const updated = await res.json()
-            setMembers(prev => [...prev, updated.result])
-        } else {
-            toast.error('Failed to add user')
+        try {
+            await assignUserToProject(selectedProject, userEmail);
+            toast.success('User added');
+            setUserEmail('');
+            await refetchMembers();
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to add user');
         }
-    }
+    };
 
     const handleRemove = async (userId: string) => {
-        const res = await fetch("/api/projects/access/remove", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ projectId: selectedProject, userId })
-        })
-
-        if (res.ok) {
-            toast.success('Remove User Success')
-            setMembers(prev => prev.filter(m => m.user.id !== userId))
-        } else {
-            toast.error('Failed to remove user')
+        try {
+            await removeUserFromProject(selectedProject, userId);
+            toast.success('Remove User Success');
+            await refetchMembers();
+        } catch (error: any) {
+            toast.error(error.message || 'Failed to remove user');
         }
-    }
+    };
 
     return (
         <div className="max-w-3xl mx-auto p-4 space-y-6">

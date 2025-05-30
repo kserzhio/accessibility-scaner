@@ -1,24 +1,27 @@
 'use client'
-
-import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import { Accordion } from '@/components/ui/accordion'
 import { ViolationAccordionItem } from 'components/violation/ViolationAccordionItem'
+import { useQuery } from '@tanstack/react-query'
+import { fetchPageScanDetails } from 'services/api/projectService'
 
 export default function ScanDetailsPage() {
     const { projectId, pageId } = useParams() as { projectId: string; pageId: string }
     const router = useRouter()
-    const [scan, setScan] = useState<any>(null)
+    const {
+        data: scan,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ['scanDetails', projectId, pageId],
+        queryFn: () => fetchPageScanDetails(projectId, pageId),
+        enabled: !!projectId && !!pageId,
+    });
 
-    useEffect(() => {
-        fetch(`/api/projects/${projectId}/pages/${pageId}/details`)
-            .then(res => res.json())
-            .then(data => setScan(data.scanResult))
-    }, [projectId, pageId])
-
-    if (!scan) return <div className="p-6">Loading...</div>
+    if (isLoading) return <div className="p-6">Loading...</div>;
+    if (error) return <div className="p-6 text-red-600">Failed to load scan details</div>;
 
     const { page, score, totalIssues, violations } = scan
     const getColor = (score: number) => {

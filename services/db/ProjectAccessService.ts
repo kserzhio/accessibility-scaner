@@ -3,9 +3,7 @@ import { prisma } from 'lib/prisma'
 
 export const ProjectAccessService = {
     async getAllProjects() {
-        return await prisma.project.findMany({
-            select: { id: true, name: true }
-        });
+        return await prisma.project.findMany();
     },
 
     async getProjectMembers(projectId: string) {

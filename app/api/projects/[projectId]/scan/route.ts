@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { scanProjectPages } from 'services/scanService'
+import { scanProjectPages } from 'services/db/scanService'
 
 export async function POST(
     req: Request,

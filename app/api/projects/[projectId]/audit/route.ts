@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuditCriteriaForProject } from 'services/auditService';
+import { getAuditCriteriaForProject } from 'services/db/auditService';
 
 export async function GET(
     req: NextRequest,

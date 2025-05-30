@@ -1,17 +1,20 @@
+'use client'
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import { projectService } from 'services/projectService';
 
-interface Project {
-    id: string;
-    name: string;
-    createdAt: string;
-}
+import { useQuery } from '@tanstack/react-query';
+import { fetchProjects } from 'services/api/projectService';
 
-export default async function AuditProjectsListPage() {
-    const projects = await projectService.getAllProjects()
+export default function AuditProjectsListPage() {
+    const { data: projects = [], isLoading, error } = useQuery({
+        queryKey: ['projects'],
+        queryFn: fetchProjects,
+    });
+
+    if (isLoading) return <div className="p-4">Loading...</div>;
+    if (error) return <div className="p-4 text-red-600">Error loading projects</div>;
 
     return (
         <div className="space-y-6">

@@ -1,7 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
 import { Eye, MousePointerClick, BookOpen, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 

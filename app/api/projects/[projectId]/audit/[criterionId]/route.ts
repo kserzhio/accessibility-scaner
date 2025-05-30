@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveAuditResult } from 'services/auditService';
+import { saveAuditResult } from 'services/db/auditService';
 
 export async function POST(
   req: NextRequest,

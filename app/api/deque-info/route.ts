@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dequeService } from 'services/dequeService'
+import { dequeService } from 'services/db/dequeService'
 
 export async function GET(req: NextRequest) {
     const url = req.nextUrl.searchParams.get('url')

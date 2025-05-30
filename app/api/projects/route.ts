@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { ProjectAccessService } from 'services/ProjectAccessService'
-import { projectService } from 'services/projectService'
+import { ProjectAccessService } from 'services/db/ProjectAccessService'
+import { projectService } from 'services/db/projectService'
 
 export async function POST(req: Request) {
     try {

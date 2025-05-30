@@ -1,6 +1,4 @@
 'use client'
-
-import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -8,18 +6,18 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { ProjectLineChart } from 'components/charts/ProjectLineChart'
 import { ProjectPieChart } from 'components/charts/ProjectPieChart'
+import { useQuery } from '@tanstack/react-query'
+import { fetchProjectSummary } from 'services/api/projectService'
 
 export default function ProjectPage() {
     const { projectId } = useParams() as { projectId: string }
-    const [data, setData] = useState<any>(null)
+    const { data = null, isLoading, error } = useQuery({
+        queryKey: ['projectSummary', projectId],
+        queryFn: () => fetchProjectSummary(projectId),
+        enabled: !!projectId,
+    });
 
-    useEffect(() => {
-        fetch(`/api/projects/${projectId}/summary`)
-            .then(res => res.json())
-            .then(setData)
-    }, [projectId])
-
-    if (!data) return <div className="p-6">Loading...</div>
+    if (isLoading) return <div className="p-4">Loading summary...</div>;
 
     const { project, stats } = data
     const getColor = (score: number) => {

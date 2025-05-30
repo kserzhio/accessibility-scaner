@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Loader2 } from 'lucide-react'
-
+import { useQuery } from '@tanstack/react-query'
+import { fetchDequeInfo } from 'services/api/dequeApi'
+import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 interface Props {
     violation: {
         id: string
@@ -15,25 +16,16 @@ interface Props {
 }
 
 export function ViolationAccordionItem({ violation }: Props) {
-    const [loading, setLoading] = useState(false)
-    const [content, setContent] = useState<{
-        fixHtml: string
-        why: string
-        impactSummary: string
-    } | null>(null)
-
-    const fetchDetails = async () => {
-        if (content || loading) return
-        setLoading(true)
-        try {
-            const res = await fetch(`/api/deque-info?url=${encodeURIComponent(violation.helpUrl)}`)
-            const data = await res.json()
-            setContent(data)
-        } catch (err) {
-            console.error('Parse error:', err)
-        }
-        setLoading(false)
-    }
+    const [open, setOpen] = useState(false);
+    const {
+        data: content,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ['dequeInfo', violation.helpUrl],
+        queryFn: () => fetchDequeInfo(violation.helpUrl),
+        enabled: open && !!violation.helpUrl
+    });
     const getImpactColor = (impact: string) => {
         switch (impact.toUpperCase()) {
             case 'CRITICAL':
@@ -48,7 +40,7 @@ export function ViolationAccordionItem({ violation }: Props) {
         }
     }
     return (
-        <AccordionItem value={violation.id} onClick={fetchDetails}>
+        <AccordionItem value={violation.id} onClick={() => setOpen((prev) => !prev)}>
             <AccordionTrigger className="no-underline hover:no-underline cursor-pointer hover:bg-muted/50 transition-colors px-2">
                 <div className="text-left w-full">
                     <div className={`text-sm font-medium ${getImpactColor(violation.impact)}`}>
@@ -58,12 +50,12 @@ export function ViolationAccordionItem({ violation }: Props) {
                 </div>
             </AccordionTrigger>
             <AccordionContent>
-                {loading && (
+                {isLoading && (
                     <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
                         <Loader2 className="w-4 h-4 animate-spin" /> Loading...
                     </div>
                 )}
-                {!loading && content && (
+                {!isLoading && content && (
                     <div className="space-y-4 text-sm text-gray-800 dark:text-gray-100 p-2">
                         <div>
                             <div

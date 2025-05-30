@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,15 +9,8 @@ import { CheckCircle, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { toast } from 'react-toastify';
-
-interface Criterion {
-    id: string;
-    title: string;
-    level: 'A' | 'AA' | 'AAA';
-    principle?: string;
-    outcome?: string;
-    observations?: string;
-}
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { completeAudit, fetchAuditCriteria } from 'services/api/projectService';
 
 const outcomeColor = {
     PASSED: 'bg-green-100 text-green-800',
@@ -29,17 +22,17 @@ const outcomeColor = {
 
 export default function ViewReportPage() {
     const { projectId } = useParams() as { projectId: string };
-    const [criteria, setCriteria] = useState<Criterion[]>([]);
     const [filter, setFilter] = useState<string>('ALL');
 
-    useEffect(() => {
-        if (!projectId) return;
-        fetch(`/api/projects/${projectId}/audit`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) setCriteria(data.criteria);
-            });
-    }, [projectId]);
+    const {
+        data: criteria = [],
+        isLoading,
+        error,
+    } = useQuery<Criterion[]>({
+        queryKey: ['auditCriteria', projectId],
+        queryFn: () => fetchAuditCriteria(projectId),
+        enabled: !!projectId,
+    });
 
     const filtered = filter === 'ALL' ? criteria : criteria.filter(c => c.outcome === filter);
     const hasUnchecked = criteria.some(c => !c.outcome || c.outcome === 'NOT_CHECKED');
@@ -70,17 +63,16 @@ export default function ViewReportPage() {
         });
         doc.save(`audit-report-${projectId}.pdf`);
     };
-    const handleCompleteAudit = async () => {
-        try {
-            const res = await fetch(`/api/projects/${projectId}/complete`, {
-                method: 'POST',
-            });
-            const data = await res.json();
-            if (data.success) toast.success('Save success')
-        } catch (err) {
-            toast.error('Save Error')
-        }
+    const mutation = useMutation({
+        mutationFn: () => completeAudit(projectId),
+        onSuccess: () => toast.success('Save success'),
+        onError: () => toast.error('Save Error'),
+    });
+    const handleCompleteAudit = () => {
+        mutation.mutate();
     };
+    if (isLoading) return <div className="p-6">Loading audit report...</div>;
+    if (error) return <div className="p-6 text-red-600">Error loading report</div>;
     return (
         <div className="space-y-6">
             <div className="rounded-lg bg-muted p-4 flex flex-wrap justify-between gap-4">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -8,8 +8,8 @@ import { toast } from 'react-toastify'
 import { CheckCircle, XCircle, Loader2, Plus, ArrowLeft } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { z } from 'zod'
-
-
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { addPageToProject, fetchProjectPages, scanAllPages, scanSinglePage } from 'services/api/projectService'
 
 interface Page {
   id: string
@@ -19,74 +19,70 @@ interface Page {
   status: 'PENDING' | 'SUCCESS' | 'ERROR'
 }
 const urlSchema = z.string().url({ message: 'Invalid URL format' })
+export type RouteParams = {
+  projectId: string;
+  pageId?: string;
+};
 export default function ProjectPagesPage() {
-  const { projectId } = useParams()
+  const { projectId } = useParams<RouteParams>();
   const router = useRouter()
-  const [pages, setPages] = useState<Page[]>([])
   const [scanningAll, startTransition] = useTransition()
   const [scanningPageId, setScanningPageId] = useState<string | null>(null)
   const [newUrl, setNewUrl] = useState('')
   const [adding, setAdding] = useState(false)
+
+
+  const queryClient = useQueryClient();
+
+  const { data: pages = [], isLoading } = useQuery({
+    queryKey: ['projectPages', projectId],
+    queryFn: () => fetchProjectPages(projectId),
+    enabled: !!projectId,
+  });
   const completed = pages.filter(p => p.status === 'SUCCESS').length
 
-  const fetchPages = async () => {
-    const res = await fetch(`/api/projects/${projectId}/pages`)
-    const data = await res.json()
-    setPages(data.pages || [])
-  }
-
-  useEffect(() => {
-    fetchPages()
-  }, [projectId])
-
-  const handleScanAll = () => {
-    startTransition(async () => {
-      const res = await fetch(`/api/projects/${projectId}/scan`, { method: 'POST' })
-      if (!res.ok) {
-        toast.error('Scan failed')
-        return
-      }
-      const result = await res.json()
-      toast.success(`Scanned ${result.results.length} pages`)
-      fetchPages()
-    })
-  }
+  const handleScanAll = async () => {
+    try {
+      const result = await scanAllPages(projectId);
+      toast.success(`Scanned ${result.results.length} pages`);
+      queryClient.invalidateQueries({ queryKey: ['projectPages', projectId] });
+    } catch (error) {
+      toast.error('Scan failed');
+    }
+  };
 
   const handleScanOne = async (pageId: string) => {
-    setScanningPageId(pageId)
-    const res = await fetch(`/api/pages/${pageId}/scan`, { method: 'POST' })
-    if (!res.ok) {
-      toast.error('Scan failed')
-    } else {
-      toast.success('Page scanned')
-      fetchPages()
+    try {
+      setScanningPageId(pageId);
+      await scanSinglePage(pageId);
+      toast.success('Page scanned');
+      queryClient.invalidateQueries({ queryKey: ['projectPages', projectId] });
+    } catch (error) {
+      toast.error('Scan failed');
+    } finally {
+      setScanningPageId(null);
     }
-    setScanningPageId(null)
-  }
+  };
 
   const handleAddPage = async () => {
-    const parsed = urlSchema.safeParse(newUrl.trim())
+    const parsed = urlSchema.safeParse(newUrl.trim());
     if (!parsed.success) {
-      toast.error(parsed.error.errors[0].message)
-      return
+      toast.error(parsed.error.errors[0].message);
+      return;
     }
 
-    setAdding(true)
-    const res = await fetch(`/api/projects/${projectId}/pages`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: parsed.data }),
-    })
-
-    if (!res.ok) {
-      toast.error('Failed to add page')
-    } else {
-      toast.success('Page added')
-      setNewUrl('')
-      fetchPages()
+    setAdding(true);
+    try {
+      await addPageToProject(projectId, parsed.data);
+      toast.success('Page added');
+      setNewUrl('');
+      queryClient.invalidateQueries({ queryKey: ['projectPages', projectId] });
+    } catch {
+      toast.error('Failed to add page');
+    } finally {
+      setAdding(false);
     }
-    setAdding(false)
-  }
+  };
   return (
     <div className="max-w-6xl mx-auto mt-10 space-y-6">
       <div className="flex justify-between items-center">

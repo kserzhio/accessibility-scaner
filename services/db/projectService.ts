@@ -3,17 +3,29 @@ import { createProjectSchema } from 'lib/validators/createProjectSchema'
 
 export const projectService = {
     async createProject(data: unknown) {
-        const parsed = createProjectSchema.safeParse(data)
+        const parsed = createProjectSchema.safeParse(data);
         if (!parsed.success) {
-            throw parsed.error
+            throw parsed.error;
         }
 
-        const { name, slug, pages } = parsed.data
+        const {
+            name,
+            slug,
+            pages,
+            client,
+            priority,
+            type,
+            endDate,
+        } = parsed.data;
 
         return await prisma.project.create({
             data: {
                 name,
                 slug,
+                client,
+                priority,
+                type,
+                endDate: endDate ? new Date(endDate) : undefined,
                 pages: {
                     create: pages.map((url) => ({
                         url,
@@ -22,7 +34,7 @@ export const projectService = {
                 },
             },
             include: { pages: true },
-        })
+        });
     },
     async addPageToProject(projectId: string, url: string) {
         const slug = url.replace(/^https?:\/\//, '').replace(/[^a-zA-Z0-9]/g, '-')

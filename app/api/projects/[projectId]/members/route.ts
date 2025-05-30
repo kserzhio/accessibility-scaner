@@ -1,6 +1,6 @@
 
 import { NextRequest } from 'next/server';
-import { ProjectAccessService } from 'services/ProjectAccessService';
+import { ProjectAccessService } from 'services/db/ProjectAccessService';
 
 export async function GET(
     req: NextRequest,
