@@ -9,6 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+public/screenshots/
 # Ignore entire migrations folder
 prisma/migrations/
 
